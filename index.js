@@ -10,11 +10,6 @@ var ignoreMethod = {
 };
 
 
-function errRes (res, err) {
-    res.json(500, { csrf: err.toString() });
-}
-
-
 module.exports = function csurf (options) {
 
 
@@ -30,8 +25,9 @@ module.exports = function csurf (options) {
 
         var secret = getSecret(req, options.cookie);
         var token;
+        var err;
 
-        if (secret instanceof Error) return errRes(res, secret);
+        if (secret instanceof Error) return res.json(500, { csrf: secret.toString() });
 
 
         req.csrfToken = function csrfToken () {
@@ -43,7 +39,7 @@ module.exports = function csurf (options) {
 
             } else {
                 sec = getSecret(req, options.cookie);
-                if (sec instanceof Error) return errRes(res, sec);
+                if (sec instanceof Error) return res.json(500, { csrf: sec.toString() });
             }
 
             if (token && sec === secret) return token;
@@ -51,7 +47,7 @@ module.exports = function csurf (options) {
             if (sec === undefined) {
                 sec = tokens.secretSync();
                 err = setSecret(req, res, sec, options.cookie);
-                if (err instanceof Error) return errRes(res, err);
+                if (err instanceof Error) return res.json(500, { csrf: err.toString() });
             }
 
             secret = sec;
@@ -64,11 +60,11 @@ module.exports = function csurf (options) {
         if (!secret) {
             secret = tokens.secretSync();
             err = setSecret(req, res, secret, options.cookie);
-            if (err instanceof Error) return errRes(res, err);
+            if (err instanceof Error) return res.json(500, { csrf: err.toString() });
         }
 
         err = verifyToken(req, tokens, secret, value(req));
-        if (err instanceof Error) return errRes(res, err);
+        if (err instanceof Error) return res.json(403, { csrf: err.toString() });
 
         next();
     }
