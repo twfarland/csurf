@@ -6,7 +6,7 @@ var sign       = require('cookie-signature').sign;
 var ignoreMethod = {
     GET:        true,
     HEAD:       true,
-    OPTIONS:    true,
+    OPTIONS:    true
 };
 
 
@@ -97,7 +97,7 @@ function getSecret (req, cookie) {
         secret = req.session.csrfSecret;
 
     } else {
-        return new Error('misconfigured csrf')
+        return new Error('misconfigured csrf');
     }
 
     return secret;
@@ -123,13 +123,9 @@ function setSecret (req, res, val, cookie) {
     var secret;
 
     if (cookie) {
-        
         if (cookie.signed) {
-
             secret = req.secret;
-
             if (!secret) return new Error('cookieParser("secret") required for signed cookies');
-
             val = 's:' + sign(val, secret);
         }
 
